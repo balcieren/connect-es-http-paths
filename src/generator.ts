@@ -20,6 +20,7 @@ function generatePathMappings(
       mappings[connectPath] = {
         path: method.httpPath,
         method: method.httpMethod,
+        ...(method.body ? { body: method.body } : {}),
       };
     }
   }
@@ -62,7 +63,7 @@ export interface RestAdapterOptions {
   queryParamFormat?: "camelCase" | "snake_case";
 }
 
-const pathMappings: Record<string, { path: string; method: string }> = ${JSON.stringify(
+const pathMappings: Record<string, { path: string; method: string; body?: string }> = ${JSON.stringify(
     pathMappings,
     null,
     2,
@@ -163,7 +164,11 @@ export function restAdapter(options?: RestAdapterOptions): typeof globalThis.fet
         newUrl.searchParams.append(k, v);
       }
       newInit.body = undefined;
+    } else if (mapping.body && mapping.body !== "*") {
+      // body: "specificField" — send only that field's value as the body
+      newInit.body = JSON.stringify(remaining[mapping.body] ?? {});
     } else {
+      // body: "*" or unspecified — send all remaining fields as body
       newInit.body = JSON.stringify(remaining);
     }
 

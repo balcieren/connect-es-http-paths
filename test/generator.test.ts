@@ -119,4 +119,66 @@ describe("Code Generator", () => {
       expect(result).toContain('options?.queryParamFormat ?? "camelCase"');
     });
   });
+
+  describe("body annotation handling", () => {
+    it("should include body field in path mappings when specified", () => {
+      const services: ParsedService[] = [
+        {
+          packageName: "users.v1",
+          serviceName: "UserService",
+          fullName: "users.v1.UserService",
+          methods: [
+            {
+              name: "UpdateUser",
+              inputType: "UpdateUserRequest",
+              outputType: "UpdateUserResponse",
+              httpMethod: "PATCH",
+              httpPath: "/v1/users/{user_id}",
+              body: "user",
+            },
+          ],
+        },
+      ];
+
+      const result = generateRestAdapter(services);
+      expect(result).toContain('"body": "user"');
+    });
+
+    it("should include body: * in path mappings", () => {
+      const result = generateRestAdapter(mockServices);
+      expect(result).toContain('"body": "*"');
+    });
+
+    it("should not include body field when not specified", () => {
+      const services: ParsedService[] = [
+        {
+          packageName: "users.v1",
+          serviceName: "UserService",
+          fullName: "users.v1.UserService",
+          methods: [
+            {
+              name: "GetUser",
+              inputType: "GetUserRequest",
+              outputType: "GetUserResponse",
+              httpMethod: "GET",
+              httpPath: "/v1/users/{user_id}",
+            },
+          ],
+        },
+      ];
+
+      const result = generateRestAdapter(services);
+      // The GET mapping should not have a body field
+      expect(result).not.toMatch(
+        /"\/users\.v1\.UserService\/GetUser"[\s\S]*?"body"/,
+      );
+    });
+
+    it("should handle body: specificField differently from body: *", () => {
+      const result = generateRestAdapter(mockServices);
+      // The generated code should have logic for specific body fields
+      expect(result).toContain('mapping.body && mapping.body !== "*"');
+      expect(result).toContain("remaining[mapping.body]");
+    });
+  });
 });

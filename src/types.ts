@@ -48,4 +48,6 @@ export interface PathMapping {
   path: string;
   /** HTTP method (e.g., "GET") */
   method: HttpMethod;
+  /** Request body field (e.g., "*" for all fields, "user" for a specific field) */
+  body?: string;
 }
