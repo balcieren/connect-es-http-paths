@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "format:check",
+      "problemMatcher": [],
+      "label": "npm: format:check",
+      "detail": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
